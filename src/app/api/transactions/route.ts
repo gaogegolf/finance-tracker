@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
         date: txn.date,
         name: txn.name,
         merchantName: txn.merchantName,
-        category: txn.personalCategory || txn.category[0] || 'Other',
+        category: txn.personalCategory || txn.category || 'Other',
         isTransfer: txn.isTransfer,
         account: txn.account
       })),

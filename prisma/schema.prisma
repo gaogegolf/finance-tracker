@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -82,7 +82,7 @@ model Transaction {
   merchantName      String?
   originalDescription String?
   
-  category          String[]
+  category          String?
   personalCategory  String?
   subcategory       String?
   

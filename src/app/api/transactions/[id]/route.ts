@@ -47,7 +47,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         date: updatedTransaction.date,
         name: updatedTransaction.name,
         merchantName: updatedTransaction.merchantName,
-        category: updatedTransaction.personalCategory || updatedTransaction.category[0] || 'Other',
+        category: updatedTransaction.personalCategory || updatedTransaction.category || 'Other',
         isTransfer: updatedTransaction.isTransfer,
         account: updatedTransaction.account
       }

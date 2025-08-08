@@ -138,7 +138,7 @@ export async function syncTransactions(userId: string) {
               name: plaidTxn.name,
               merchantName: plaidTxn.merchant_name,
               originalDescription: plaidTxn.original_description,
-              category: plaidTxn.category || [],
+              category: plaidTxn.category ? plaidTxn.category[0] : null,
               personalCategory: normalizedCategory,
               isTransfer,
               isPending: false

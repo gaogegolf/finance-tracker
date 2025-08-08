@@ -20,7 +20,7 @@ export default function DashboardPage() {
   } | null>(null)
   const [spendData, setSpendData] = useState<SpendSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const router = useRouter()
 
   const formatCurrency = (value: number) => {
