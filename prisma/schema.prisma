@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  syncFrequency String    @default("weekly") // "daily" or "weekly"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  institutions   Institution[]
+  accounts       Account[]
+  transactions   Transaction[]
+  manualAssets   ManualAsset[]
+  balanceSnapshots BalanceSnapshot[]
+
+  @@map("users")
+}
+
+model Institution {
+  id               String   @id @default(cuid())
+  userId           String
+  plaidItemId      String   @unique
+  plaidAccessToken String // encrypted
+  institutionName  String?
+  status           String   @default("active") // active, error, relink_required
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accounts Account[]
+
+  @@map("institutions")
+}
+
+model Account {
+  id            String  @id @default(cuid())
+  userId        String
+  institutionId String?
+  plaidAccountId String?
+  
+  name          String
+  officialName  String?
+  mask          String?
+  type          String  // depository, credit, investment, manual
+  subtype       String?
+  currency      String  @default("USD")
+  isActive      Boolean @default(true)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institution         Institution?      @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  transactions        Transaction[]
+  balanceSnapshots    BalanceSnapshot[]
+
+  @@unique([userId, plaidAccountId])
+  @@map("accounts")
+}
+
+model Transaction {
+  id                String   @id @default(cuid())
+  userId            String
+  accountId         String
+  plaidTransactionId String? @unique
+  
+  amount            Float
+  date              DateTime
+  authorizedDate    DateTime?
+  name              String
+  merchantName      String?
+  originalDescription String?
+  
+  category          String[]
+  personalCategory  String?
+  subcategory       String?
+  
+  isTransfer        Boolean  @default(false)
+  isPending         Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model BalanceSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  accountId String
+  
+  date      DateTime
+  balance   Float
+  source    String   @default("plaid") // plaid, manual, forward_fill
+  isStale   Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, accountId, date])
+  @@map("balance_snapshots")
+}
+
+model ManualAsset {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  currentValue Float
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("manual_assets")
+}
